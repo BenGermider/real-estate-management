@@ -63,6 +63,16 @@ export $(cat .env | xargs)
 uvicorn backend.app.main:app --reload
 ```
 
+## Tests
+- Run all tests locally (uses in-memory SQLite, mocks all external services):
+```
+pip install -r backend/requirements.txt
+pytest
+```
+- What’s mocked: Pub/Sub publisher, BigQuery client, ACS/HUD network calls (ingestion is patched in tests), and bootstrap ingestion is disabled via env in tests.
+- Verification: All endpoints from the contract have positive and negative coverage (auth, datasets, ingestion, regions, metrics, insights, comparison, ops). Tests use FastAPI `TestClient` with a seeded admin user from env.
+- Extending tests: add files under `tests/` by feature (e.g., `tests/test_<area>.py`), reuse fixtures in `tests/conftest.py`, and patch new external calls with `monkeypatch`.
+
 ## Notes
 - The backend adheres strictly to the API contract from Prompt 1; no additional endpoints were added.
 - Bootstrapped ingestion is idempotent—restart of containers will not duplicate data.
