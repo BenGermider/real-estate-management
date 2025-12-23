@@ -1,0 +1,46 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: rem-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-rem}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-rem}
+      POSTGRES_DB: ${POSTGRES_DB:-rem}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./backend/migrations/001_init.sql:/docker-entrypoint-initdb.d/001_init.sql
+
+  pubsub:
+    image: gcr.io/google.com/cloudsdktool/cloud-sdk:emulators
+    container_name: rem-pubsub
+    command: >
+      gcloud beta emulators pubsub start --host-port=0.0.0.0:8085
+    ports:
+      - "8085:8085"
+    environment:
+      CLOUDSDK_CORE_PROJECT: ${GCP_PROJECT:-local-project}
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rem-backend
+    depends_on:
+      - postgres
+      - pubsub
+    env_file: .env
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    restart: unless-stopped
+    command: uvicorn backend.app.main:app --host 0.0.0.0 --port 8000
+    volumes:
+      - ./.env:/app/.env:ro
+
+volumes:
+  pgdata:
+
