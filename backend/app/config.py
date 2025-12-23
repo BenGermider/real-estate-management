@@ -12,6 +12,11 @@ class Settings(BaseSettings):
 
     backend_port: int = Field(8000, alias="BACKEND_PORT")
 
+
+    postgres_db: str = Field(..., alias="POSTGRES_DB")
+    postgres_host: str = Field(..., alias="POSTGRES_HOST")
+    postgres_port: int = Field(..., alias="POSTGRES_PORT")
+
     gcp_project: str = Field("local-project", alias="GCP_PROJECT")
     pubsub_emulator_host: str | None = Field(None, alias="PUBSUB_EMULATOR_HOST")
     pubsub_topic_ingestion: str = Field("ingestion-jobs", alias="PUBSUB_TOPIC_INGESTION")
@@ -35,4 +40,5 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = False
+        extra = "ignore"
 

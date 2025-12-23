@@ -2,6 +2,18 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
+# Install system dependencies for bcrypt
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    python3-dev \
+    libffi-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Upgrade pip
+RUN pip install --upgrade pip
+
+WORKDIR /app/backend
+
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
